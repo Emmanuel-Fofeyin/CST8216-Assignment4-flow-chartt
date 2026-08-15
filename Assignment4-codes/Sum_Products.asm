@@ -52,7 +52,7 @@ SP_Loop         lda b, x        ; Load current array byte into accumulator B (as
                 ; (Using standard repeated addition or direct multiplication depending on assembler constraints)
                 
                 ; For standard HCS12 implementation:
-                # Insert multiplication logic matching course standard #
+                ; Insert multiplication logic matching course standard #
                 
                 inx             ; Move pointer to next element
                 dey             ; Decrease factor (10 -> 9 -> ... -> 1)

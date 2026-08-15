@@ -23,27 +23,42 @@
 ;             it is not
 ;
 ; Preconditions:
-;          Subroutine is supplied with Sum of Products, a 16-bit value in D register
+;          Subroutine is supplied with Sum of Products,
+;          a 16-bit value in D register
 ;
 ; Use:     jsr Validate_ISBN
 ;
 ; Postconditions:
-;          Subroutine returns a "Flag" in accumulator A (e.g., 0 for Valid, 1 for InValid).
-;          Registers D and X/Y used during division are updated or destroyed.
+;          Subroutine returns a validation flag in accumulator A.
+;          A = $55 for VALID
+;          A = $AA for INVALID
+;          Registers D and X are updated/destroyed.
 ;
-; Algorithm:  
-;          1. Load the 16-bit Sum of Products into the D register.
-;          2. Perform an unsigned integer division of D by 11 (using IDIV or EDIV standard structure).
-;          3. Check the remainder (which resides in the designated remainder register/accumulator).
-;          4. Set the validation flag to 0 if the remainder is zero (Valid), or 1 if non-zero (InValid).
-;          5. Return from subroutine.
+; Algorithm:
+;          1. Load divisor 11 into X.
+;          2. Divide D by X.
+;          3. IDIV leaves the quotient in X and remainder in D.
+;          4. If remainder is zero, return VALID_ISBN ($55).
+;          5. Otherwise, return INVALID_ISBN ($AA).
+;          6. Return from subroutine.
 ;
-Validate_ISBN   ; subroutine entry label - must be present
-                ldx #11         ; Load divisor 11 into X register
-                idiv            ; Perform integer division: D / X -> quotient in X, remainder in D
-                cpx #0          ; Check if remainder (in X) is equal to 0
-                bne ISBN_Bad    ; If remainder is not 0, branch to ISBN_Bad
-                clra            ; Otherwise, set flag to 0 (Valid)
-                bra ISBN_Done   ; Branch around the invalid case
-ISBN_Bad        lda #1          ; Set flag to 1 (InValid)
-ISBN_Done       rts             ; Return from subroutine
+
+Validate_ISBN
+                ldx     #11             ; Divisor = 11
+
+                idiv                    ; D / X
+                                        ; X = quotient
+                                        ; D = remainder
+
+                cpd     #0              ; Check remainder
+
+                bne     ISBN_Bad        ; Non-zero remainder = invalid
+
+                ldaa    #VALID_ISBN     ; Valid ISBN = $55
+                bra     ISBN_Done
+
+ISBN_Bad
+                ldaa    #INVALID_ISBN   ; Invalid ISBN = $AA
+
+ISBN_Done
+                rts

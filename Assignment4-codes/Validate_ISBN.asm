@@ -42,8 +42,8 @@ Validate_ISBN   ; subroutine entry label - must be present
                 ldx #11         ; Load divisor 11 into X register
                 idiv            ; Perform integer division: D / X -> quotient in X, remainder in D
                 cpx #0          ; Check if remainder (in X) is equal to 0
-                beq Is_Valid    ; If remainder is 0, jump to valid tag
-                lda #1          ; Otherwise, set flag to 1 (InValid)
-                bra End_Validate
-Is_Valid        clra            ; Set flag to 0 (Valid)
-End_Validate    rts             ; Return from subroutine
+                bne Not_Valid   ; If remainder is not 0, branch to Not_Valid
+                clra            ; Otherwise, set flag to 0 (Valid)
+                bra Done        ; Branch around the invalid case
+Not_Valid       lda #1          ; Set flag to 1 (InValid)
+Done            rts             ; Return from subroutine
